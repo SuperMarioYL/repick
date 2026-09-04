@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# local ledger / recorded run data
+.repick/
+
+# editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# build scratch
+PUBLISH_BLOCKED.md
+BUILD_SETUP_NEXT_STEPS.md
+.spawn.*
+.builder_*
+.build_metadata*
+.stage_*
+
+# agent scratch (do not ship)
+.claude/
+CLAUDE.md

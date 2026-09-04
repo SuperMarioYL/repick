@@ -1,0 +1,48 @@
+{
+  "name": "repick",
+  "version": "0.1.0",
+  "description": "tool-choice empirical replay for coding agents — record tool decisions, A/B compare runs, retune availability from evidence",
+  "type": "module",
+  "license": "MIT",
+  "author": "SuperMarioYL",
+  "homepage": "https://github.com/SuperMarioYL/repick",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SuperMarioYL/repick"
+  },
+  "bugs": {
+    "url": "https://github.com/SuperMarioYL/repick/issues"
+  },
+  "keywords": [
+    "cli",
+    "agent",
+    "coding-agent",
+    "tool-choice",
+    "ab-testing",
+    "replay",
+    "claude-code",
+    "codex",
+    "mcp"
+  ],
+  "bin": {
+    "repick": "src/cli.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "repick": "bun run src/cli.ts"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "commander": "^13.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.0",
+    "typescript": "^5.5.0"
+  }
+}

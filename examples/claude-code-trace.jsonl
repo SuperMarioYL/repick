@@ -1,0 +1,3 @@
+{"step":1,"task":"refactor auth module","tool":"grep","args":"pattern=validate_token","available":["grep","ripgrep","lsp-symbol","read-file"],"resolved":true,"secs":24.0,"tokens":1100,"retried":true,"fallback":"lsp-symbol"}
+{"step":2,"task":"find dead code","tool":"grep","args":"pattern=TODO|FIXME","available":["grep","ripgrep","lsp-symbol","read-file"],"resolved":false,"secs":31.0,"tokens":1400,"retried":true,"fallback":null}
+{"step":3,"task":"rename symbol everywhere","tool":"grep","args":"pattern=oldName","available":["grep","ripgrep","lsp-symbol","read-file"],"resolved":true,"secs":18.0,"tokens":820,"retried":false,"fallback":null}
