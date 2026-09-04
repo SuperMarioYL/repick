@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "repick",
+  "github": "https://github.com/SuperMarioYL/repick",
+  "host": "repick.lei6393.com",
+  "lang": { "primary": "en", "toggle": true },
+  "accent": ["#8b7cf6", "#4d9bff", "#34e5d0"],
+  "hero": {
+    "eyebrow": { "zh": "记录 · 对比 · 看清", "en": "Record · Compare · See" },
+    "headline": { "zh": "看清你的 agent\n每次工具选择的胜负", "en": "See which agent tool\nactually won" },
+    "sub": { "zh": "记录每次工具决策和结果，A/B 对比两次运行，立刻看到哪个工具赢了、哪个拖了后腿。", "en": "Record every tool decision with its outcome, A/B compare two runs, and instantly see which tool won and which held you back." },
+    "command": "repick ab --run-a trace-a.jsonl --run-b trace-b.jsonl",
+    "cta": { "zh": "查看 GitHub", "en": "View on GitHub" },
+    "ctaGithub": { "zh": "Star 项目", "en": "Star the repo" },
+    "scroll": { "zh": "向下滚动", "en": "Scroll to explore" }
+  },
+  "advantages": [
+    {
+      "title": { "zh": "每个选择都有记录", "en": "Every choice on the record" },
+      "body": { "zh": "不再猜测 agent 为什么用了 grep 而不是 LSP —— 每次工具决策和它的结果都被记录下来，可追溯、可审计。", "en": "Stop guessing why your agent reached for grep instead of LSP — every tool decision and its outcome is recorded, traceable, and auditable." },
+      "chips": ["› Claude Code", "› Codex", "› JSONL trace"]
+    },
+    {
+      "title": { "zh": "两次运行，一眼对比", "en": "Two runs, one glance" },
+      "body": { "zh": "把两次运行放在一起，按任务自动配对，输出一张 Markdown 表格 —— 哪个工具赢了、哪个输了、哪个打平，一目了然。", "en": "Put two runs side by side, auto-matched by task, and get a Markdown table — which tool won, which lost, which tied, all at a glance." },
+      "chips": ["› Auto task-matching", "› Markdown table", "› Winner flag"]
+    },
+    {
+      "title": { "zh": "输了就标出来", "en": "Loser gets flagged" },
+      "body": { "zh": "不需要你逐行翻日志 —— repick 直接告诉你哪个工具在哪个任务上拖了后腿，你决定下次要不要关掉它。", "en": "No need to read through logs line by line — repick tells you exactly which tool held you back on which task, so you can decide whether to turn it off next time." },
+      "chips": ["› Per-task verdict", "› Losing tool highlighted", "› Evidence-backed"]
+    }
+  ],
+  "scene": { "kind": "mesh", "nodes": ["grep", "LSP", "editor", "browser", "test-runner"] },
+  "cta": {
+    "headline": { "zh": "开始记录你的 agent", "en": "Start recording your agent" },
+    "sub": { "zh": "三个命令，从零到 A/B 对比表。MIT 开源，免费使用。", "en": "Three commands from zero to an A/B table. MIT open source, free to use." },
+    "button": { "zh": "查看 GitHub", "en": "View on GitHub" }
+  },
+  "footer": { "tag": { "zh": "MIT 开源 · 由 SuperMarioYL 构建", "en": "MIT open source · Built by SuperMarioYL" } }
+}
