@@ -107,6 +107,10 @@
           "alt": {
             "zh": "三个配对任务的工具选择、解决状态和示例耗时差异。",
             "en": "Tool choices, resolution status and fixture duration differences for three matched tasks."
+          },
+          "mobile": {
+            "light": "/assets/presentation/process-mobile-light.svg",
+            "dark": "/assets/presentation/process-mobile-dark.svg"
           }
         }
       },
@@ -125,6 +129,10 @@
           "alt": {
             "zh": "repick 的 adapter、ToolDecision、JSONL ledger 和 A/B 引擎。",
             "en": "repick adapters, ToolDecision records, the JSONL ledger and A/B engine."
+          },
+          "mobile": {
+            "light": "/assets/presentation/architecture-mobile-light.svg",
+            "dark": "/assets/presentation/architecture-mobile-dark.svg"
           }
         }
       },
@@ -143,6 +151,10 @@
           "alt": {
             "zh": "已实现的输入格式、标准输入、本地保存和报告输出。",
             "en": "Implemented input formats, standard input, local storage and report outputs."
+          },
+          "mobile": {
+            "light": "/assets/presentation/integrations-mobile-light.svg",
+            "dark": "/assets/presentation/integrations-mobile-dark.svg"
           }
         }
       }
