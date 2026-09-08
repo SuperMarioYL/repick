@@ -1,0 +1,70 @@
+{
+  "version": "0.1.0",
+  "source_commit": "117a9011243fb847c3bc42b280507700994f6fac",
+  "runtime": "1.4.1",
+  "fixture": "Two supplied synthetic JSONL traces with three matching tasks; trace durations and tokens are fixture values, not measured agent runs.",
+  "inputs": [
+    {
+      "path": "examples/claude-code-trace.jsonl",
+      "sha256": "a3437493914d9884b7e17231300d11939e338ba28a57147275fa58f4f11e7e06",
+      "lines": 3
+    },
+    {
+      "path": "examples/codex-trace.jsonl",
+      "sha256": "13be23b3c8939b9858c50d61d14eba342843f3e8d4034acaadb3a20034ab29c0",
+      "lines": 3
+    }
+  ],
+  "display_normalization": "Only the absolute execution directory in CLI output is replaced with a dot. Other output is unchanged.",
+  "steps": [
+    {
+      "command": "bun src/cli.ts record run-A --agent claude --trace examples/claude-code-trace.jsonl",
+      "output": "repick: recorded 3 tool decisions -> ./.repick/run-A.jsonl",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "bun src/cli.ts record run-B --agent codex --trace examples/codex-trace.jsonl",
+      "output": "repick: recorded 3 tool decisions -> ./.repick/run-B.jsonl",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "bun src/cli.ts ab run-A run-B",
+      "output": "repick ab — run-A vs run-B\n\n| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |\n| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |\n| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |\n\nLosing tool: grep (run-A) — block grep (lost 3 tasks)",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "bun src/cli.ts ab run-A run-B --verbose",
+      "output": "repick ab — run-A vs run-B\n\n| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |\n| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |\n| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |\n\nLosing tool: grep (run-A) — block grep (lost 3 tasks)\n\nPer-task diff:\n| task_sig | baseline | candidate | Δsecs | Δresolved | verdict | retune hint |\n| --- | --- | --- | --- | --- | --- | --- |\n| find-dead-code | grep | ripgrep | -24 | +1 | candidate-wins | block grep on find-dead-code |\n| refactor-auth-module | grep | lsp-symbol | -15 | 0 | candidate-wins | block grep on refactor-auth-module |\n| rename-symbol-everywhere | grep | lsp-symbol | -12 | 0 | candidate-wins | block grep on rename-symbol-everywhere |",
+      "stderr": "",
+      "exit_code": 0
+    }
+  ],
+  "limits": [
+    "No coding-agent process or model provider was called.",
+    "A/B compares exported traces; no live trace capture is demonstrated.",
+    "retune and gate print roadmap messages and do not enforce tool policy."
+  ],
+  "verification_steps": [
+    {
+      "command": "bun src/cli.ts list",
+      "output": "run-A\nrun-B",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "bun src/cli.ts retune",
+      "output": "repick: `retune` ships in m2 (v0.1.0 ships `record` + `ab` only). See the roadmap in README.md.",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "command": "bun src/cli.ts gate",
+      "output": "repick: `gate` ships in m2 (v0.1.0 ships `record` + `ab` only). See the roadmap in README.md.",
+      "stderr": "",
+      "exit_code": 0
+    }
+  ]
+}

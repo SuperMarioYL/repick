@@ -1,41 +1,309 @@
 {
-  "schema": 1,
+  "schema": 3,
   "name": "repick",
   "github": "https://github.com/SuperMarioYL/repick",
-  "host": "repick.lei6393.com",
-  "lang": { "primary": "en", "toggle": true },
-  "accent": ["#8b7cf6", "#4d9bff", "#34e5d0"],
+  "lang": {
+    "primary": "zh",
+    "toggle": true
+  },
+  "accent": [
+    "#61d8ff",
+    "#6388ff",
+    "#ad8aff"
+  ],
+  "meta": {
+    "visual_profile": "neon-particle",
+    "demo_source": "docs/demo-results.json",
+    "implementation_version": "0.1.0"
+  },
   "hero": {
-    "eyebrow": { "zh": "记录 · 对比 · 看清", "en": "Record · Compare · See" },
-    "headline": { "zh": "看清你的 agent\n每次工具选择的胜负", "en": "See which agent tool\nactually won" },
-    "sub": { "zh": "记录每次工具决策和结果，A/B 对比两次运行，立刻看到哪个工具赢了、哪个拖了后腿。", "en": "Record every tool decision with its outcome, A/B compare two runs, and instantly see which tool won and which held you back." },
-    "command": "repick ab --run-a trace-a.jsonl --run-b trace-b.jsonl",
-    "cta": { "zh": "查看 GitHub", "en": "View on GitHub" },
-    "ctaGithub": { "zh": "Star 项目", "en": "Star the repo" },
-    "scroll": { "zh": "向下滚动", "en": "Scroll to explore" }
+    "eyebrow": {
+      "zh": "工具选择 · 导出 trace 的本地对照",
+      "en": "TOOL CHOICES · LOCAL TRACE COMPARISON"
+    },
+    "headline": {
+      "zh": "让每次工具选择\n都有结果可对照",
+      "en": "Compare tool choices.\nSee the outcome."
+    },
+    "sub": {
+      "zh": "repick 把两次编码 Agent 的导出 trace 按任务对齐，比较工具选择、解决状态与记录耗时。",
+      "en": "repick aligns exported coding-agent traces by task to compare tool choices, resolution status and recorded duration."
+    },
+    "href": "#quickstart",
+    "cta": {
+      "zh": "运行本地示例",
+      "en": "Run the local example"
+    },
+    "ctaGithub": {
+      "zh": "查看源码",
+      "en": "View source"
+    }
+  },
+  "scene": {
+    "kind": "neon-graph",
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg",
+    "caption": {
+      "zh": "两次运行 · 按任务对照",
+      "en": "TWO RUNS · ONE TASK VIEW"
+    }
   },
   "advantages": [
     {
-      "title": { "zh": "每个选择都有记录", "en": "Every choice on the record" },
-      "body": { "zh": "不再猜测 agent 为什么用了 grep 而不是 LSP —— 每次工具决策和它的结果都被记录下来，可追溯、可审计。", "en": "Stop guessing why your agent reached for grep instead of LSP — every tool decision and its outcome is recorded, traceable, and auditable." },
-      "chips": ["› Claude Code", "› Codex", "› JSONL trace"]
+      "title": {
+        "zh": "从同一个任务开始",
+        "en": "Start with the same task"
+      },
+      "body": {
+        "zh": "按规范化后的任务描述配对两次运行，先确认结果是否可比，再看工具选择有什么不同。",
+        "en": "Pair runs by normalized task descriptions, then inspect how the recorded choices differ."
+      }
     },
     {
-      "title": { "zh": "两次运行，一眼对比", "en": "Two runs, one glance" },
-      "body": { "zh": "把两次运行放在一起，按任务自动配对，输出一张 Markdown 表格 —— 哪个工具赢了、哪个输了、哪个打平，一目了然。", "en": "Put two runs side by side, auto-matched by task, and get a Markdown table — which tool won, which lost, which tied, all at a glance." },
-      "chips": ["› Auto task-matching", "› Markdown table", "› Winner flag"]
+      "title": {
+        "zh": "从汇总追到具体选择",
+        "en": "Go from summary to decisions"
+      },
+      "body": {
+        "zh": "工具汇总给出方向，--verbose 的逐任务表保留解决状态与耗时差异，便于回到原始记录核对。",
+        "en": "Use the tool summary to orient your review, then inspect resolution and duration differences with --verbose."
+      }
     },
     {
-      "title": { "zh": "输了就标出来", "en": "Loser gets flagged" },
-      "body": { "zh": "不需要你逐行翻日志 —— repick 直接告诉你哪个工具在哪个任务上拖了后腿，你决定下次要不要关掉它。", "en": "No need to read through logs line by line — repick tells you exactly which tool held you back on which task, so you can decide whether to turn it off next time." },
-      "chips": ["› Per-task verdict", "› Losing tool highlighted", "› Evidence-backed"]
+      "title": {
+        "zh": "保留能再检查的记录",
+        "en": "Keep records you can revisit"
+      },
+      "body": {
+        "zh": "每次运行以 JSONL 保存在本地。报告也是 Markdown，便于复制到 issue 或评审讨论中。",
+        "en": "Each run stays in a local JSONL file. Reports are Markdown, ready to copy into an issue or review."
+      }
     }
   ],
-  "scene": { "kind": "mesh", "nodes": ["grep", "LSP", "editor", "browser", "test-runner"] },
-  "cta": {
-    "headline": { "zh": "开始记录你的 agent", "en": "Start recording your agent" },
-    "sub": { "zh": "三个命令，从零到 A/B 对比表。MIT 开源，免费使用。", "en": "Three commands from zero to an A/B table. MIT open source, free to use." },
-    "button": { "zh": "查看 GitHub", "en": "View on GitHub" }
+  "story": {
+    "intro": {
+      "title": {
+        "zh": "换了工具组合，\n结果为何不同。",
+        "en": "A different tool set.\nA result worth inspecting."
+      },
+      "body": {
+        "zh": "整次任务的成功与否还不足以解释差别。repick 把已经导出的工具事件整理到相同子任务下，比较先选了什么、是否解决、耗时多少。你得到一份可继续调查的对照报告。",
+        "en": "The success of a whole run does not explain every difference. repick groups exported tool events under matching subtasks so you can inspect the first choice, resolution status and duration in a report."
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "zh": "先对齐任务，再看差异",
+          "en": "Align tasks before comparing"
+        },
+        "body": {
+          "zh": "以输入顺序中的第一条决策代表任务的工具选择，聚合该任务的各步结果，再比较两次运行。图中是自带合成 trace 的输入数值，不是实时 Agent 测量。",
+          "en": "The first recorded decision represents the task’s tool choice. Step outcomes are aggregated before comparison. The figure uses values from supplied synthetic traces, not live agent measurements."
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "zh": "三个配对任务的工具选择、解决状态和示例耗时差异。",
+            "en": "Tool choices, resolution status and fixture duration differences for three matched tasks."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "两种输入，一份可比较记录",
+          "en": "Two formats, one comparable record"
+        },
+        "body": {
+          "zh": "导入 adapter 统一字段，ToolDecision 保留选择及结果，JSONL ledger 保存每次运行；A/B 引擎读取记录并生成报告。",
+          "en": "Ingest adapters normalize fields into ToolDecision records. A local JSONL ledger stores each run; the A/B engine reads the records and renders a report."
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "zh": "repick 的 adapter、ToolDecision、JSONL ledger 和 A/B 引擎。",
+            "en": "repick adapters, ToolDecision records, the JSONL ledger and A/B engine."
+          }
+        }
+      },
+      {
+        "title": {
+          "zh": "接入导出格式，带走本地报告",
+          "en": "Bring exported traces, keep local reports"
+        },
+        "body": {
+          "zh": "v0.1.0 提供 Claude 格式与 Codex 格式的 JSONL adapter、标准输入、工具汇总和逐任务表。它们使用本项目的 schema，不是实时 Agent 连接。",
+          "en": "v0.1.0 provides Claude-format and Codex-format JSONL adapters, standard input, tool summaries and task tables. They use this project’s schemas rather than live agent connections."
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "zh": "已实现的输入格式、标准输入、本地保存和报告输出。",
+            "en": "Implemented input formats, standard input, local storage and report outputs."
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "zh": "准备匹配的任务描述",
+          "en": "Prepare matching task descriptions"
+        },
+        "body": {
+          "zh": "task_sig 规范化大小写、空白和标点，不识别语义。不同措辞不会自动匹配。secs 和 duration_ms 会统一为秒，但 token 字段的统计口径仍需由采集方统一。",
+          "en": "task_sig normalizes case, whitespace and punctuation, not meaning. Different wording does not automatically match. Durations are converted to seconds; token definitions must be aligned by the trace producer."
+        }
+      },
+      {
+        "title": {
+          "zh": "理解报告怎样判定",
+          "en": "Understand the verdict"
+        },
+        "body": {
+          "zh": "只给共享 task_sig 判定胜负；只有一侧解决则该侧胜，两侧解决才比较耗时，5% 内视为平局。未配对任务可能仍在各自工具汇总中；用逐任务表核对。",
+          "en": "Only shared task signatures receive verdicts. A sole resolved side wins; when both resolve, duration decides with a 5% tie band. Unmatched tasks may still appear in tool summaries, so inspect the task table."
+        },
+        "code": "bun src/cli.ts ab run-A run-B --verbose"
+      },
+      {
+        "title": {
+          "zh": "把实验保存在不同 run 中",
+          "en": "Keep experiments in distinct runs"
+        },
+        "body": {
+          "zh": "无需配置文件或 API key。ledger 位于当前目录的 .repick/<runId>.jsonl；record 使用追加写入，再做一次实验时应选择新的 run ID。",
+          "en": "No configuration file or API key is required. The ledger lives at .repick/<runId>.jsonl under the current directory. record appends, so use a new run ID for another experiment."
+        },
+        "code": "bun src/cli.ts list"
+      }
+    ]
   },
-  "footer": { "tag": { "zh": "MIT 开源 · 由 SuperMarioYL 构建", "en": "MIT open source · Built by SuperMarioYL" } }
+  "demo": {
+    "title": {
+      "zh": "导入两份 trace，得到真实 CLI 报告",
+      "en": "Import two traces and inspect the CLI report"
+    },
+    "note": {
+      "zh": "以下输出来自 v0.1.0 的本地执行。两份输入各有 3 条合成决策；耗时和 token 为输入值，不是工具性能测量。页面展示保存的输出，不在浏览器中运行 Agent。",
+      "en": "These outputs come from a local v0.1.0 execution. Each input contains three synthetic decisions; duration and token values are fixture data, not tool-performance measurements. This page presents saved output and does not run an agent in your browser."
+    },
+    "source": "/assets/demo-results.json",
+    "steps": [
+      {
+        "label": {
+          "zh": "导入 run-A",
+          "en": "Import run-A"
+        },
+        "body": {
+          "zh": "Claude 格式示例导入为 run-A，产生 3 条 ToolDecision，并写入本地 ledger。",
+          "en": "The Claude-format example becomes run-A with three ToolDecision records in the local ledger."
+        },
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg",
+        "command": "bun src/cli.ts record run-A --agent claude --trace examples/claude-code-trace.jsonl",
+        "output": "repick: recorded 3 tool decisions -> ./.repick/run-A.jsonl"
+      },
+      {
+        "label": {
+          "zh": "导入 run-B",
+          "en": "Import run-B"
+        },
+        "body": {
+          "zh": "Codex 格式示例导入为 run-B，产生 3 条 ToolDecision。两次运行中的任务随后可供比较。",
+          "en": "The Codex-format example becomes run-B with three ToolDecision records. The two runs are now available for task comparison."
+        },
+        "image": "/assets/presentation/demo-1-light.svg",
+        "imageDark": "/assets/presentation/demo-1-dark.svg",
+        "command": "bun src/cli.ts record run-B --agent codex --trace examples/codex-trace.jsonl",
+        "output": "repick: recorded 3 tool decisions -> ./.repick/run-B.jsonl"
+      },
+      {
+        "label": {
+          "zh": "比较工具",
+          "en": "Compare tools"
+        },
+        "body": {
+          "zh": "工具表把每个 run 的任务归到首先使用的工具名下。本例输出 grep 的建议文字，不会自动禁用它。",
+          "en": "The tool table groups each run’s tasks by the first tool chosen. This example emits a suggestion about grep; it does not disable the tool."
+        },
+        "image": "/assets/presentation/demo-2-light.svg",
+        "imageDark": "/assets/presentation/demo-2-dark.svg",
+        "command": "bun src/cli.ts ab run-A run-B",
+        "output": "repick ab — run-A vs run-B\n\n| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |\n| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |\n| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |\n\nLosing tool: grep (run-A) — block grep (lost 3 tasks)"
+      },
+      {
+        "label": {
+          "zh": "核对任务",
+          "en": "Inspect tasks"
+        },
+        "body": {
+          "zh": "逐任务表显示 find-dead-code、refactor-auth-module 和 rename-symbol-everywhere 的差异，三个判定均为 candidate-wins。",
+          "en": "The task table shows differences for find-dead-code, refactor-auth-module and rename-symbol-everywhere, each with a candidate-wins verdict."
+        },
+        "image": "/assets/presentation/demo-3-light.svg",
+        "imageDark": "/assets/presentation/demo-3-dark.svg",
+        "command": "bun src/cli.ts ab run-A run-B --verbose",
+        "output": "repick ab — run-A vs run-B\n\n| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |\n| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |\n| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |\n\nLosing tool: grep (run-A) — block grep (lost 3 tasks)\n\nPer-task diff:\n| task_sig | baseline | candidate | Δsecs | Δresolved | verdict | retune hint |\n| --- | --- | --- | --- | --- | --- | --- |\n| find-dead-code | grep | ripgrep | -24 | +1 | candidate-wins | block grep on find-dead-code |\n| refactor-auth-module | grep | lsp-symbol | -15 | 0 | candidate-wins | block grep on refactor-auth-module |\n| rename-symbol-everywhere | grep | lsp-symbol | -12 | 0 | candidate-wins | block grep on rename-symbol-everywhere |"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "zh": "用自带输入运行一次",
+      "en": "Run once with the supplied inputs"
+    },
+    "body": {
+      "zh": "需要 Bun 1.1+。从新克隆的项目开始；安装依赖需要网络，后续命令读取本地示例，不启动 Agent 或请求模型 API。",
+      "en": "Requires Bun 1.1+. Start with a fresh clone. Installation needs network access; the following commands read local examples without starting an agent or calling a model API."
+    },
+    "steps": [
+      {
+        "title": {
+          "zh": "获取源码并安装",
+          "en": "Clone and install"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/repick.git\ncd repick\nbun install"
+      },
+      {
+        "title": {
+          "zh": "导入两份自带 trace",
+          "en": "Import the two supplied traces"
+        },
+        "code": "bun src/cli.ts record run-A --agent claude --trace examples/claude-code-trace.jsonl\nbun src/cli.ts record run-B --agent codex --trace examples/codex-trace.jsonl"
+      },
+      {
+        "title": {
+          "zh": "查看对照结果",
+          "en": "Read the comparison"
+        },
+        "code": "bun src/cli.ts ab run-A run-B"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "zh": "输入 adapter 接受本项目定义的 JSONL schema。任意原生 Agent 历史记录不保证能直接导入。",
+      "en": "Input adapters accept this project’s JSONL schemas; arbitrary native agent history logs may need conversion."
+    },
+    {
+      "zh": "retune 和 gate 在 v0.1.0 中仍是占位命令。报告里的 block 是建议文字，工具可用性仍由你在外部调整。",
+      "en": "retune and gate are placeholders in v0.1.0. A block hint is text advice; you still adjust tool availability outside repick."
+    },
+    {
+      "zh": "匹配结果与指标取决于输入质量。当前报告不进行因果归因，也不证明一种工具在其他任务上更好。",
+      "en": "Matching and metrics depend on the input. The report does not establish causality or prove that a tool is better on other tasks."
+    }
+  ],
+  "footer": {
+    "tag": {
+      "zh": "v0.1.0 · Bun 1.1+ · MIT",
+      "en": "v0.1.0 · Bun 1.1+ · MIT"
+    }
+  },
+  "palette": "auto",
+  "host": "repick.lei6393.com"
 }

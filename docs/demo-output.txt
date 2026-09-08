@@ -1,0 +1,44 @@
+$ bun src/cli.ts record run-A --agent claude --trace examples/claude-code-trace.jsonl
+repick: recorded 3 tool decisions -> ./.repick/run-A.jsonl
+
+$ bun src/cli.ts record run-B --agent codex --trace examples/codex-trace.jsonl
+repick: recorded 3 tool decisions -> ./.repick/run-B.jsonl
+
+$ bun src/cli.ts ab run-A run-B
+repick ab — run-A vs run-B
+
+| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |
+| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |
+| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |
+
+Losing tool: grep (run-A) — block grep (lost 3 tasks)
+
+$ bun src/cli.ts ab run-A run-B --verbose
+repick ab — run-A vs run-B
+
+| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |
+| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |
+| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |
+
+Losing tool: grep (run-A) — block grep (lost 3 tasks)
+
+Per-task diff:
+| task_sig | baseline | candidate | Δsecs | Δresolved | verdict | retune hint |
+| --- | --- | --- | --- | --- | --- | --- |
+| find-dead-code | grep | ripgrep | -24 | +1 | candidate-wins | block grep on find-dead-code |
+| refactor-auth-module | grep | lsp-symbol | -15 | 0 | candidate-wins | block grep on refactor-auth-module |
+| rename-symbol-everywhere | grep | lsp-symbol | -12 | 0 | candidate-wins | block grep on rename-symbol-everywhere |
+
+$ bun src/cli.ts list
+run-A
+run-B
+
+$ bun src/cli.ts retune
+repick: `retune` ships in m2 (v0.1.0 ships `record` + `ab` only). See the roadmap in README.md.
+
+$ bun src/cli.ts gate
+repick: `gate` ships in m2 (v0.1.0 ships `record` + `ab` only). See the roadmap in README.md.

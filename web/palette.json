@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "56e699-6ae7e7-acf6b4-288f2f47caf1",
+  "identity": "https://github.com/supermarioyl/repick",
+  "primary": "#56e699",
+  "secondary": "#6ae7e7",
+  "highlight": "#acf6b4",
+  "dark": {
+    "bg": "#050c0f",
+    "panel": "#0c171b",
+    "code": "#0a1718",
+    "ink": "#eefdf0",
+    "muted": "#95b9b5",
+    "line": "#173c2d",
+    "primary": "#56e699",
+    "secondary": "#6ae7e7",
+    "highlight": "#acf6b4",
+    "accent": "#56e699",
+    "buttonStart": "#328559",
+    "buttonEnd": "#3b8181",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#f9fefb",
+    "panel": "#f7fefa",
+    "code": "#f3fdf8",
+    "ink": "#132a25",
+    "muted": "#557b78",
+    "line": "#cbf7e0",
+    "primary": "#318257",
+    "secondary": "#3a7e7e",
+    "highlight": "#577d5b",
+    "accent": "#318257",
+    "buttonStart": "#328559",
+    "buttonEnd": "#3b8181",
+    "buttonText": "#ffffff"
+  }
+}

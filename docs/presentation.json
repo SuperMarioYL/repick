@@ -1,0 +1,102 @@
+{
+  "name": "repick",
+  "tagline": "Compare tool choices. See the outcome.",
+  "architecture": {
+    "title": "From exported events to a matched comparison",
+    "nodes": [
+      {
+        "title": "CLI",
+        "detail": "record / ab / list"
+      },
+      {
+        "title": "Trace adapters",
+        "detail": "Claude and Codex schemas"
+      },
+      {
+        "title": "ToolDecision",
+        "detail": "Task, tool and outcome"
+      },
+      {
+        "title": "JSONL ledger",
+        "detail": "Local run records"
+      },
+      {
+        "title": "A/B engine",
+        "detail": "Task signatures and deltas"
+      },
+      {
+        "title": "Markdown report",
+        "detail": "Tools and per-task details"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        5
+      ]
+    ]
+  },
+  "process": {
+    "title": "Compare the same tasks across two runs",
+    "steps": [
+      {
+        "title": "Record",
+        "detail": "Import the supplied JSONL events"
+      },
+      {
+        "title": "Match",
+        "detail": "Normalize task signatures"
+      },
+      {
+        "title": "Compare",
+        "detail": "Inspect tool choices and outcomes"
+      }
+    ],
+    "result": "The supplied three-task fixture reports candidate-wins; timing values come from the input."
+  },
+  "integrations": {
+    "title": "Exported traces in, inspectable reports out",
+    "items": [
+      {
+        "title": "Claude schema",
+        "detail": "Local JSONL adapter"
+      },
+      {
+        "title": "Codex schema",
+        "detail": "Local JSONL adapter"
+      },
+      {
+        "title": "Standard input",
+        "detail": "Pipe exported events"
+      },
+      {
+        "title": "Local ledger",
+        "detail": "One JSONL per run"
+      },
+      {
+        "title": "Markdown",
+        "detail": "Tool summaries"
+      },
+      {
+        "title": "Verbose diff",
+        "detail": "Per-task comparison"
+      }
+    ]
+  }
+}

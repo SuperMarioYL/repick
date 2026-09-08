@@ -1,113 +1,91 @@
-<div align="right"><sub><a href="./README.md">English</a>&nbsp;&nbsp;⇄&nbsp;&nbsp;<b>简体中文</b></sub></div>
+[English](README.en.md) | **简体中文**
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.svg">
-    <img src="./assets/hero-light.svg" width="880" alt="repick — 面向编码智能体的工具选择经验回放">
-  </picture>
-</p>
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/hero-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/hero-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/hero-dark.svg">
+  <img src="assets/presentation/hero-light.svg" width="880" alt="repick 的粒子汇聚标识：比较工具选择，查看任务结果。">
+</picture>
 
-<p align="center"><sub>为开发者 A/B 对比并重调智能体工具选择的回放层。</sub></p>
+**repick 把编码 Agent 的导出 trace 整理成按任务对齐的 A/B 表，让你看清工具选择与任务结果之间的差别。**
 
-<p align="center">
-  <a href="./LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-blue"></a>
-  <img alt="release" src="https://img.shields.io/github/v/release/SuperMarioYL/repick">
-  <img alt="ci" src="https://img.shields.io/github/actions/workflow/status/SuperMarioYL/repick/ci.yml?branch=main&label=ci">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.5-3178c6?logo=typescript&logoColor=white">
-  <img alt="Bun" src="https://img.shields.io/badge/Bun-1.1-000?logo=bun">
-</p>
+`v0.1.0` · `Bun ≥ 1.1` · `TypeScript` · [MIT](LICENSE)
 
-**repick 记录编码智能体每一次工具选择及其可观测结果，对两次运行做 A/B 对比，并交给你一个有据可依的重调旋钮 —— 不是凭感觉。**
+[为什么](#为什么做-repick) · [架构](#架构) · [安装](#安装) · [快速开始](#快速开始) · [使用](#使用) · [Demo](#demo) · [接入与配置](#接入与配置) · [路线图](#路线图)
 
-<h2><img src="https://api.iconify.design/tabler:topology-star-3.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> 架构</h2>
+## 为什么做 repick
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/atlas-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/atlas-light.svg">
-    <img src="./assets/atlas-light.svg" width="880" alt="repick 架构：智能体 trace → 适配器 → ToolDecision 账本 → A/B 回放 → 结果表">
-  </picture>
-</p>
+换了一组工具以后，整次任务的成功与否还不足以解释变化。你可能更想知道：同一个子任务，两次运行分别先选了什么工具，最后是否解决、花了多长时间，中间有没有重试或转用其他工具。
 
-新的原语是 **ToolDecision** —— 从 trace 中抽离出的一个工具选择时刻，并与它的可观测结果关联，使工具选择成为一等可比的单位，而非运行中不可见的副作用。各智能体的适配器把 Claude Code 与 Codex 不同的 trace 字段命名隐藏在一个归一化形状之后；A/B 引擎按 `task_sig`（稳定的任务指纹）把两次运行的决策连接起来，逐工具对比结果。
+repick 从已经导出的 trace 中提取这些记录，再把同名任务放到一起。先检查任务结果，再比较记录的耗时，最后回到逐任务差异核对。报告供你继续调查，下一次运行的工具设置由你决定。
 
-## 目录
+下面用仓库自带的两份合成 trace 展示这条路径。图中耗时和后文的 token 数都来自输入字段，不是本次执行测得的 Agent 性能，也不能用来证明某个工具普遍更好。
 
-- [为什么需要它](#为什么需要它)
-- [安装](#安装)
-- [快速开始](#快速开始)
-- [用法](#用法)
-- [演示](#演示)
-- [路线图](#路线图)
-- [协议](#协议)
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/process-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/process-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/process-dark.svg">
+  <img src="assets/presentation/process-light.svg" width="880" alt="两份示例 trace 按相同任务配对，对比 grep 与候选工具的解决状态及输入耗时。">
+</picture>
 
-## 为什么需要它
+## 架构
 
-编码智能体现在每个子任务都会在多个工具间做选择 —— grep、LSP、文件编辑器、浏览器 —— 但没有任何记录把每一次工具选择与该子任务的可观测结果关联起来。工程师看着自己的智能体伸手去用 grep 而忽略项目里的 LSP，怀疑这一选择不对，却没有按选择粒度的结果账本，也没有旋钮能在下一次运行里关掉 grep。repick 把工具选择变成一个可引导的流原语：观测结果、对运行做 A/B 对比、再依证据重调工具可用性。
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/architecture-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/architecture-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/architecture-dark.svg">
+  <img src="assets/presentation/architecture-light.svg" width="880" alt="两个导入 adapter 将 trace 规范化为 ToolDecision，写入本地 JSONL ledger，再由 A/B 引擎生成 Markdown 报告。">
+</picture>
+
+两个导入 adapter 将不同字段整理成同一个 `ToolDecision`：任务标识、所选工具、可选工具，以及带有解决状态、耗时、token、重试和 fallback 的结果。CLI 把每次运行写入本地 JSONL 文件，比较引擎再读取两份记录、按 `task_sig` 配对，输出 Markdown 表格。
+
+对应源码位于 [导入层](src/ingest/)、[数据模型](src/ingest/schema.ts)、[本地 ledger](src/ledger/store.ts) 和 [A/B 引擎](src/replay/ab.ts)。`task_sig` 只规范化文本的大小写、空白和标点，不会识别不同措辞是否表达同一个任务。
 
 ## 安装
 
-repick 运行在 [Bun](https://bun.sh) 1.1+ 之上。
+需要 Bun 1.1 或更新版本；先用 `bun --version` 检查当前环境。
 
 ```bash
-curl -fsSL https://bun.sh/install | bash   # 如果还没装 bun
 git clone https://github.com/SuperMarioYL/repick.git
-cd repick && bun install
+cd repick
+bun install
 ```
 
-发布后 `bunx repick` 即可全局使用。本地克隆可用 `bun src/cli.ts` 调用（或 `bun link` 把 `repick` 放到 PATH 上）。
+在源码目录中使用 `bun src/cli.ts`。下面的离线示例不启动 Agent、不调用模型 API；安装依赖时需要网络。
 
 ## 快速开始
 
-从全新克隆到看到 A/B 表，三条命令。（`repick init` 是可选的 —— `record` 会自动建好 `.repick/` 账本。）
+在刚克隆的项目中，导入 [Claude 格式示例](examples/claude-code-trace.jsonl) 和 [Codex 格式示例](examples/codex-trace.jsonl)，然后生成比较表：
 
 ```bash
 bun src/cli.ts record run-A --agent claude --trace examples/claude-code-trace.jsonl
-bun src/cli.ts record run-B --agent codex  --trace examples/codex-trace.jsonl
+bun src/cli.ts record run-B --agent codex --trace examples/codex-trace.jsonl
 bun src/cli.ts ab run-A run-B
 ```
 
-<details><summary>示例输出</summary>
+两份输入各包含 3 条决策，任务描述能够一一配对。输出会包含：
 
-```
-repick ab — run-A vs run-B
-
-| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |
-| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |
-| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |
-
+```text
 Losing tool: grep (run-A) — block grep (lost 3 tasks)
 ```
-</details>
 
-<h2><img src="https://api.iconify.design/tabler:terminal-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> 用法</h2>
+`block grep` 是报告里的建议文字，当前版本不会据此禁用工具。`record` 会自动建立 ledger，因此不必先执行 `init`。同一 run ID 会追加记录；重复试验时请换用新的 run ID，以免把两次导入合在一起。
 
-repick 是一个三动词界面：`record`、`ab`，以及（m2 阶段的）`retune`。每一步用户耗时都不超过一分钟。
+## 使用
 
 ```bash
-# 建立 .repick/ 账本（可选 —— record 会按需自建）
-repick init
+# 查看已导入的 run ID
+bun src/cli.ts list
 
-# 把导出的智能体 trace 作为 ToolDecision 流写入账本
-# --agent 选择适配器；--trace - 从标准输入读取
-repick record run-A --agent claude --trace path/to/trace.jsonl
-repick record run-B --agent codex  --trace path/to/trace.jsonl
-
-# 对比两次运行；-v 附带逐任务差异
-repick ab run-A run-B --verbose
-
-# 列出账本里的运行
-repick list
+# 展开每个匹配任务的差异
+bun src/cli.ts ab run-A run-B --verbose
 ```
 
-一份 trace 就是每行一个 JSON 对象。Claude Code 与 Codex 字段名不同（正是适配器要隐藏的混乱）；无论哪种，适配器都归一化为一个 `ToolDecision`。各格式样例见 `examples/`。v0.1 采集的是**导出的** trace（仅做事后回放）—— 实时包裹智能体是后续工作。
+`record` 的 `--agent` 选择导入格式，支持 `claude` / `claude-code` 和 `codex`；`--trace` 指向 JSONL 文件，传入 `-` 时读取标准输入。`init` 可选，只负责建立本地目录。v0.1.0 的主要操作是 `record`、`ab` 和 `list`。
 
-<h2><img src="https://api.iconify.design/tabler:photo.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> 演示</h2>
+## Demo
 
-主角产物就是这张 A/B 结果表。这里把 `run-A`（Claude Code，重度依赖 grep）与 `run-B`（Codex，ripgrep + LSP）在同样三个重构任务上对比：
+同一次本地运行生成了下面的工具汇总表。每一行按“run + 任务中首先出现的工具”分组，`picks` 是该组的任务数；如果任务有多个步骤，耗时和 token 会先在任务内累加。
 
 | tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -115,22 +93,70 @@ repick list
 | lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |
 | ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |
 
-```
-Losing tool: grep (run-A) — block grep (lost 3 tasks)
-```
+追加 `--verbose` 后，可以核对汇总结论来自哪些任务：
 
-repick 标出了 grep：三个任务里智能体都先选了 grep，而先选 ripgrep + LSP 的那次运行每个任务都更快解决。这正是“grep 干赢 LSP、却没法引导”的痛点在你自己 trace 上被量化的样子。用上面的快速开始命令即可复现（可复现的 vhs 脚本见 `docs/demo.tape`）。
+| task_sig | baseline | candidate | Δsecs | Δresolved | verdict | retune hint |
+| --- | --- | --- | --- | --- | --- | --- |
+| find-dead-code | grep | ripgrep | -24 | +1 | candidate-wins | block grep on find-dead-code |
+| refactor-auth-module | grep | lsp-symbol | -15 | 0 | candidate-wins | block grep on refactor-auth-module |
+| rename-symbol-everywhere | grep | lsp-symbol | -12 | 0 | candidate-wins | block grep on rename-symbol-everywhere |
 
-<h2><img src="https://api.iconify.design/tabler:map-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> 路线图</h2>
+[完整命令与输出](docs/demo-results.json) · [可重放命令脚本](docs/demo.sh) · [文本记录](docs/demo-output.txt)
 
-- [x] **m1 —— record + A/B 表** · 适配器（Claude Code + Codex）、JSONL 账本、`task_sig` A/B 连接、能标出败方工具的命令行表格。*(本版本)*
-- [ ] **m2 —— retune 回路** · `repick retune` 依 A/B 判定生成 `ToolAvailabilityConfig`，一个 MCP 门控服务（按需经 stdio 拉起，非守护进程）遵守它，使下一次运行确实无法触达被禁工具。`ab` 增加前后差异行。
-- [ ] **m3 —— 跨厂商** *(延伸目标)* · Cursor 适配器、跨智能体 `task_sig` 归一化使同一任务能在 Claude Code / Codex / Cursor 间对比，以及看板导出。
+### 比较规则
 
-v0.1 明确不做：Web UI / 托管看板、自动改写智能体提示词、学习式工具选择策略、实时在线引导、遥测上传，以及按 token 成本的建议。
+1. 只给两次运行中都存在的 `task_sig` 生成逐任务判定；未匹配任务仍可能出现在各自的工具汇总中。
+2. 一个任务含多个步骤时，使用输入顺序中的第一条决策代表工具选择；任一步骤解决即视为任务解决，耗时与 token 累加。
+3. 只有一侧解决时，该侧胜出；两侧都解决时比较耗时，差距不超过较大耗时的 5% 视为平局；两侧都未解决时为 `inconclusive`。
+4. 按每个工具的任务胜负数生成汇总判定。输出适合定位值得复查的选择，不会把相关性变成工具效果的因果结论。
 
-<h2><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> 协议</h2>
+## 能力与职责
 
-MIT —— 见 [LICENSE](./LICENSE)。免费开源；无账号、无云、无付费功能。在 [github.com/SuperMarioYL/repick](https://github.com/SuperMarioYL/repick) 提 issue 或 PR；issue 模板就是“贴出你的 `repick ab` 表”。
+<picture>
+  <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/integrations-mobile-dark.svg">
+  <source media="(max-width: 640px)" srcset="assets/presentation/integrations-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/integrations-dark.svg">
+  <img src="assets/presentation/integrations-light.svg" width="880" alt="repick v0.1.0 已实现两种 trace schema、标准输入、本地 ledger、工具表和逐任务差异。">
+</picture>
 
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+| 环节 | v0.1.0 的职责 | 需要你提供的内容 |
+|---|---|---|
+| Trace 导入 | 读取两种示例定义的 JSONL 格式，验证并规范化字段 | 按相应 schema 导出的工具事件和结果 |
+| 记录保存 | 在 `.repick/<runId>.jsonl` 追加 `ToolDecision` | 能区分各次实验的 run ID |
+| A/B 比较 | 匹配任务、聚合结果、生成工具表及逐任务差异 | 可比较的任务描述与一致的指标口径 |
+| 采取行动 | 输出 `retune hint` 文字 | 人工判断并在外部调整工具设置 |
+
+这些 adapter 对应本项目定义的导出格式，不是对 Agent 的实时连接，也不保证任意原生历史日志都能直接导入。`retune` 和 `gate` 目前只输出路线图提示。
+
+## 接入与配置
+
+当前版本不需要配置文件或 API key。状态位置取决于执行命令时的工作目录，导入和比较时应在同一个项目目录中操作。先对照示例准备每行一个 JSON 对象的输入：
+
+| 含义 | Claude 格式 | Codex 格式 | 规范化后 |
+|---|---|---|---|
+| 任务 | `task` | `intent` | `task_sig` |
+| 步骤 | `step` | `seq` | `step_idx` |
+| 工具 | `tool` | `name` | `tool` |
+| 参数摘要 | `args` | `summary` | `arg_summary` |
+| 可选工具 | `available` | `tools` | `available_tools` |
+| 是否解决 | `resolved` | `ok` | `outcome.resolved` |
+| 耗时 | `secs` | `duration_ms` | 秒，后者除以 1000 |
+| Token | `tokens` | `tokens_in` | `outcome.tokens` |
+
+`retried` 和可选 `fallback` 也会保留。采集方需要统一统计口径，尤其是 `tokens` 与 `tokens_in` 的含义；repick 做字段映射，不校准不同来源的计量语义。两个任务描述只有经过文本规范化后相同，才会被配对。
+
+开发时可运行 `bun test` 和 `bun run typecheck`。输入契约见 [schema](src/ingest/schema.ts)，判定逻辑见 [A/B 引擎](src/replay/ab.ts)。
+
+## 路线图
+
+| 状态 | 范围 |
+|---|---|
+| 已实现 · m1 | 两种导出格式、JSONL ledger、按任务 A/B 比较、工具汇总和逐任务差异 |
+| 计划 · m2 | 根据报告生成 `ToolAvailabilityConfig`，通过按需启动的 MCP gate 执行工具可用性设置 |
+| 探索 · m3 | Cursor 导入、跨措辞任务对齐，以及 dashboard 导出 |
+
+当前版本不含托管 dashboard、实时 Agent 包装、自动改写提示词或学习式工具选择策略。
+
+## 许可证
+
+[MIT](LICENSE) © 2026 SuperMarioYL · [源码与问题反馈](https://github.com/SuperMarioYL/repick)
