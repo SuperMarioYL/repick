@@ -33,7 +33,7 @@
     "repick": "bun run src/cli.ts"
   },
   "engines": {
-    "bun": ">=1.2.0"
+    "bun": ">=1.4.0"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",

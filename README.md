@@ -9,7 +9,7 @@
 
 **repick 把编码 Agent 的导出 trace 整理成按任务对齐的 A/B 表，让你看清工具选择与任务结果之间的差别。**
 
-`v0.2.0` · `Bun ≥ 1.2` · `TypeScript` · [MIT](LICENSE)
+`v0.2.0` · `Bun ≥ 1.4` · `TypeScript` · [MIT](LICENSE)
 
 [为什么](#为什么做-repick) · [架构](#架构) · [安装](#安装) · [快速开始](#快速开始) · [使用](#使用) · [Demo](#demo) · [接入与配置](#接入与配置) · [路线图](#路线图)
 
@@ -43,7 +43,7 @@ repick 从已经导出的 trace 中提取这些记录，再把同名任务放到
 
 ## 安装
 
-需要 Bun 1.2 或更新版本；先用 `bun --version` 检查当前环境。
+需要 Bun 1.4 或更新版本；先用 `bun --version` 检查当前环境。
 
 ```bash
 git clone https://github.com/SuperMarioYL/repick.git
