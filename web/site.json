@@ -142,8 +142,8 @@
           "en": "Bring exported traces, keep local reports"
         },
         "body": {
-          "zh": "v0.1.0 提供 Claude 格式与 Codex 格式的 JSONL adapter、标准输入、工具汇总和逐任务表。它们使用本项目的 schema，不是实时 Agent 连接。",
-          "en": "v0.1.0 provides Claude-format and Codex-format JSONL adapters, standard input, tool summaries and task tables. They use this project’s schemas rather than live agent connections."
+          "zh": "当前版本提供 Claude 格式与 Codex 格式的 JSONL adapter、标准输入、工具汇总和逐任务表，并带有 retune 与 gate：retune 从 A/B 判定生成带证据指针的工具可用性配置，gate 以 MCP stdio 供 Agent 查询。它们使用本项目的 schema，不是实时 Agent 连接。",
+          "en": "The current release provides Claude-format and Codex-format JSONL adapters, standard input, tool summaries and per-task tables, plus retune and gate: retune derives an evidence-backed tool-availability config from A/B verdicts, and gate serves it over MCP stdio. They use this project's schemas rather than live agent connections."
         },
         "image": {
           "light": "/assets/presentation/integrations-light.svg",
@@ -302,8 +302,8 @@
       "en": "Input adapters accept this project’s JSONL schemas; arbitrary native agent history logs may need conversion."
     },
     {
-      "zh": "retune 和 gate 在 v0.1.0 中仍是占位命令。报告里的 block 是建议文字，工具可用性仍由你在外部调整。",
-      "en": "retune and gate are placeholders in v0.1.0. A block hint is text advice; you still adjust tool availability outside repick."
+      "zh": "gate 通过 MCP stdio 回答工具可用性，record 会按活动配置标记本次运行；宿主内置工具（如 Claude Code 的 grep）无法被物理移除，是否遵守由 Agent 决定。",
+      "en": "The gate answers availability over MCP stdio and record stamps the active config; host built-ins (e.g. Claude Code's grep) cannot be physically removed — honoring the deny is the agent's call."
     },
     {
       "zh": "匹配结果与指标取决于输入质量。当前报告不进行因果归因，也不证明一种工具在其他任务上更好。",
@@ -312,8 +312,8 @@
   ],
   "footer": {
     "tag": {
-      "zh": "v0.1.0 · Bun 1.1+ · MIT",
-      "en": "v0.1.0 · Bun 1.1+ · MIT"
+      "zh": "v0.2.0 · Bun 1.4+ · MIT",
+      "en": "v0.2.0 · Bun 1.4+ · MIT"
     }
   },
   "palette": "auto",
