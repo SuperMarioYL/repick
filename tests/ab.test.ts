@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { computeABReport, summarizeTools, flagLosingTool } from "../src/replay/ab";
+import { computeABReport, summarizeTools, flagLosingTool, type ToolSummary } from "../src/replay/ab";
 import { renderReport } from "../src/replay/report";
 import type { RunRecord, ToolDecision } from "../src/ingest/schema";
 
@@ -140,4 +140,20 @@ describe("renderReport", () => {
     expect(out).toContain("Per-task diff");
     expect(out).toContain("Δsecs");
   });
+});
+
+test("flagLosingTool ranks by losses, not picks", () => {
+  const summaries: ToolSummary[] = [
+    // fs lost 1 of 50 tasks; grep lost 3 of 3 — grep is the documented flag
+    { tool: "fs", run_id: "A", side: "baseline", picks: 50, tasks_resolved: 49, avg_secs: 3, tokens: 500, wins: 0, losses: 1, verdict: "loser", retune_hint: "block fs (lost 1 task)" },
+    { tool: "grep", run_id: "A", side: "baseline", picks: 3, tasks_resolved: 0, avg_secs: 24, tokens: 900, wins: 0, losses: 3, verdict: "loser", retune_hint: "block grep (lost 3 tasks)" },
+  ];
+  const flagged = flagLosingTool(summaries);
+  expect(flagged?.tool).toBe("grep");
+  // ties on losses fall back to picks
+  const tie: ToolSummary[] = [
+    { ...summaries[0], tool: "x", picks: 2, losses: 2 },
+    { ...summaries[1], tool: "y", picks: 9, losses: 2 },
+  ];
+  expect(flagLosingTool(tie)?.tool).toBe("y");
 });

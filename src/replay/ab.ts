@@ -24,6 +24,8 @@ export type ToolSummary = {
   tasks_resolved: number;
   avg_secs: number;
   tokens: number;
+  wins: number;
+  losses: number;
   verdict: "winner" | "loser" | "tie" | "—";
   retune_hint: string;
 };
@@ -185,6 +187,8 @@ export function summarizeTools(
         tasks_resolved,
         avg_secs,
         tokens,
+        wins,
+        losses,
         verdict,
         retune_hint: hint,
       });
@@ -203,5 +207,5 @@ export function summarizeTools(
 export function flagLosingTool(summaries: ToolSummary[]): ToolSummary | null {
   const losers = summaries.filter((s) => s.verdict === "loser");
   if (losers.length === 0) return null;
-  return losers.sort((a, z) => z.picks - a.picks)[0];
+  return losers.sort((a, z) => z.losses - a.losses || z.picks - a.picks)[0];
 }

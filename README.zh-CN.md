@@ -9,7 +9,7 @@
 
 **repick 把编码 Agent 的导出 trace 整理成按任务对齐的 A/B 表，让你看清工具选择与任务结果之间的差别。**
 
-`v0.1.0` · `Bun ≥ 1.1` · `TypeScript` · [MIT](LICENSE)
+`v0.2.0` · `Bun ≥ 1.2` · `TypeScript` · [MIT](LICENSE)
 
 [为什么](#为什么做-repick) · [架构](#架构) · [安装](#安装) · [快速开始](#快速开始) · [使用](#使用) · [Demo](#demo) · [接入与配置](#接入与配置) · [路线图](#路线图)
 
@@ -43,7 +43,7 @@ repick 从已经导出的 trace 中提取这些记录，再把同名任务放到
 
 ## 安装
 
-需要 Bun 1.1 或更新版本；先用 `bun --version` 检查当前环境。
+需要 Bun 1.2 或更新版本；先用 `bun --version` 检查当前环境。
 
 ```bash
 git clone https://github.com/SuperMarioYL/repick.git
@@ -79,6 +79,12 @@ bun src/cli.ts list
 
 # 展开每个匹配任务的差异
 bun src/cli.ts ab run-A run-B --verbose
+
+# 从 A/B 判定生成 ToolAvailabilityConfig（--block/--allow 手动覆盖，--dry-run 只打印）
+bun src/cli.ts retune run-A run-B
+
+# 以 MCP stdio 方式启动 gate（Agent 按需拉起，读取 .repick/retune.json）
+bun src/cli.ts gate
 ```
 
 `record` 的 `--agent` 选择导入格式，支持 `claude` / `claude-code` 和 `codex`；`--trace` 指向 JSONL 文件，传入 `-` 时读取标准输入。`init` 可选，只负责建立本地目录。v0.1.0 的主要操作是 `record`、`ab` 和 `list`。
@@ -87,11 +93,11 @@ bun src/cli.ts ab run-A run-B --verbose
 
 同一次本地运行生成了下面的工具汇总表。每一行按“run + 任务中首先出现的工具”分组，`picks` 是该组的任务数；如果任务有多个步骤，耗时和 token 会先在任务内累加。
 
-| tool | run | picks | resolved | avg-secs | tokens | verdict | retune hint |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| grep | run-A | 3 | 2 | 24.3 | 3320 | loser | block grep (lost 3 tasks) |
-| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | winner | — |
-| ripgrep | run-B | 1 | 1 | 7 | 360 | winner | — |
+| tool | run | picks | resolved | avg-secs | tokens | W/L | verdict | retune hint |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| grep | run-A | 3 | 2 | 24.3 | 3320 | 0/3 | loser | block grep (lost 3 tasks) |
+| lsp-symbol | run-B | 2 | 2 | 7.5 | 840 | 2/0 | winner | — |
+| ripgrep | run-B | 1 | 1 | 7 | 360 | 1/0 | winner | — |
 
 追加 `--verbose` 后，可以核对汇总结论来自哪些任务：
 
@@ -116,17 +122,17 @@ bun src/cli.ts ab run-A run-B --verbose
   <source media="(max-width: 640px) and (prefers-color-scheme: dark)" srcset="assets/presentation/integrations-mobile-dark.svg">
   <source media="(max-width: 640px)" srcset="assets/presentation/integrations-mobile-light.svg">
   <source media="(prefers-color-scheme: dark)" srcset="assets/presentation/integrations-dark.svg">
-  <img src="assets/presentation/integrations-light.svg" width="880" alt="repick v0.1.0 已实现两种 trace schema、标准输入、本地 ledger、工具表和逐任务差异。">
+  <img src="assets/presentation/integrations-light.svg" width="880" alt="repick v0.2.0 已实现两种 trace schema、标准输入、本地 ledger、工具表、逐任务差异、retune 配置与 MCP gate。">
 </picture>
 
-| 环节 | v0.1.0 的职责 | 需要你提供的内容 |
+| 环节 | v0.2.0 的职责 | 需要你提供的内容 |
 |---|---|---|
 | Trace 导入 | 读取两种示例定义的 JSONL 格式，验证并规范化字段 | 按相应 schema 导出的工具事件和结果 |
-| 记录保存 | 在 `.repick/<runId>.jsonl` 追加 `ToolDecision` | 能区分各次实验的 run ID |
+| 记录保存 | 在 `.repick/runs/<runId>.jsonl` 追加 `ToolDecision` | 能区分各次实验的 run ID |
 | A/B 比较 | 匹配任务、聚合结果、生成工具表及逐任务差异 | 可比较的任务描述与一致的指标口径 |
-| 采取行动 | 输出 `retune hint` 文字 | 人工判断并在外部调整工具设置 |
+| 采取行动 | `retune` 从判定生成 `ToolAvailabilityConfig`，`gate` 以 MCP stdio 供 Agent 查询 | 决定是否采用 / 手动 `--block`、`--allow` 覆盖 |
 
-这些 adapter 对应本项目定义的导出格式，不是对 Agent 的实时连接，也不保证任意原生历史日志都能直接导入。`retune` 和 `gate` 目前只输出路线图提示。
+这些 adapter 对应本项目定义的导出格式，不是对 Agent 的实时连接，也不保证任意原生历史日志都能直接导入。`retune` 会把判定收敛成一份带证据指针的 `ToolAvailabilityConfig`（写入 `.repick/retune.json`）；`gate` 在标准输入输出上提供 `check_tool` / `list_availability` 两个 MCP 工具，Agent 可在调用前查询。`record` 在存在活动配置时，会把被屏蔽的工具从本次运行的 `available_tools` 中移除，`ab` 因此能在下一次对照中给出 Retune effect 前后差异数行。
 
 ## 接入与配置
 

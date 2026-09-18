@@ -1,6 +1,6 @@
 {
   "name": "repick",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "tool-choice empirical replay for coding agents — record tool decisions, A/B compare runs, retune availability from evidence",
   "type": "module",
   "license": "MIT",
@@ -33,7 +33,7 @@
     "repick": "bun run src/cli.ts"
   },
   "engines": {
-    "bun": ">=1.1.0"
+    "bun": ">=1.2.0"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",

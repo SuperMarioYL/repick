@@ -3,6 +3,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { appendDecisions, readRun, listRuns, writeRun } from "../src/ledger/store";
+import { writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import type { ToolDecision } from "../src/ingest/schema";
 
 function mkDecision(
@@ -71,6 +73,26 @@ describe("ledger store", () => {
       mkDecision("run-A", "t", "grep", true, 1),
     ]);
     expect(await listRuns(dir)).toEqual(["run-A", "run-B"]);
+  });
+
+
+  test("runs land under runs/ and a v0.1.0 flat file still loads", async () => {
+    await appendDecisions(dir, "run-A", [
+      mkDecision("run-A", "task-a", "grep", true, 5),
+    ]);
+    // new layout: .repick/runs/<id>.jsonl
+    expect(existsSync(join(dir, "runs", "run-A.jsonl"))).toBe(true);
+    expect(existsSync(join(dir, "run-A.jsonl"))).toBe(false);
+    // legacy fallback: a flat v0.1.0 file is still readable
+    await writeFile(
+      join(dir, "run-old.jsonl"),
+      JSON.stringify(mkDecision("run-old", "task-o", "grep", true, 5)) + "\n",
+      "utf8",
+    );
+    const legacy = await readRun(dir, "run-old");
+    expect(legacy.run_id).toBe("run-old");
+    // listRuns sees both layouts
+    expect(await listRuns(dir)).toEqual(["run-A", "run-old"]);
   });
 
   test("writeRun overwrites the run instead of appending", async () => {
